@@ -27,6 +27,7 @@ function AppInner() {
   const [blocks, setBlocks] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [mineBlock, setMineBlock] = useState(null);
+  const [adminView, setAdminView] = useState('create');
   const [liveUpdate, setLiveUpdate] = useState(null);
 
   const addToast = useCallback((message, type = 'info') => {
@@ -195,12 +196,12 @@ function AppInner() {
                 </div>
               </div>
 
-              {tab === 'dashboard' && <Dashboard {...pageProps} />}
+              {tab === 'dashboard' && <Dashboard {...pageProps} onBlocksClick={() => { setTab('admin'); setAdminView('blockchain'); }} />}
               {tab === 'vote' && <VotePage {...pageProps} />}
               {tab === 'results' && <ResultsPage {...pageProps} />}
               {tab === 'myvotes' && <MyVotesPage {...pageProps} />}
               {tab === 'security' && <SecurityPage {...pageProps} />}
-              {tab === 'admin' && user.role === 'admin' && <AdminPage {...pageProps} />}
+              {tab === 'admin' && user.role === 'admin' && <AdminPage {...pageProps} adminView={adminView} setAdminView={setAdminView} />}
             </motion.div>
           </AnimatePresence>
         </main>

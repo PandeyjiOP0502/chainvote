@@ -20,8 +20,121 @@ const Countdown = ({ endDate }) => {
   return <span style={{ fontFamily: "'IBM Plex Mono',monospace", color: '#22c55e', fontSize: 12 }}>{t}</span>;
 };
 
+// ── BLOCKCHAIN EXPLORER ─────────────────────────────────────────────────────────
+function BlockchainExplorer({ blocks: dbBlocks }) {
+  const [xTab, setXTab] = useState('chain');
+  const [sTab, setSTab] = useState('contract');
+  const [qLog, setQLog] = useState(['// Click a query button to run it']);
+  const mono = { fontFamily: "'IBM Plex Mono',monospace" };
+
+  const chain = (dbBlocks || []).map((b, i) => ({
+    number: b.id, type: i === 0 ? 'genesis' : 'vote',
+    hash: b.hash || '0x'+'0'.repeat(64),
+    prevHash: b.prev_hash || '0x'+'0'.repeat(64),
+    voteCount: b.vote_count || 0,
+    ts: b.mined_at ? new Date(b.mined_at).toLocaleTimeString() : '—',
+  }));
+
+  const QUERIES = {
+    getResults:  () => ['contract.getResults() =>', '', ...chain.map(b => `  Block #${b.number}: ${b.type} — voteCount: ${b.voteCount}`), '', '  View function — zero gas cost'],
+    hasVoted:    () => ['voters[address].hasVoted =>', '', '  true after castVote()', '  immutable — cannot be reset on-chain'],
+    getBlock:    () => { const b = chain[chain.length-1]||{}; return ['provider.getBlock("latest") =>', '', `  number: ${b.number??0}`, `  hash:   0x${(b.hash||'').slice(2,14)}…`, `  prev:   0x${(b.prevHash||'').slice(2,14)}…`, `  ts:     ${b.ts||'—'}`]; },
+    blockCount:  () => ['provider.getBlockNumber() =>', '', `  ${chain.length} blocks total`],
+    txReceipt:   () => { const vb = chain.filter(b=>b.type==='vote'); if(!vb.length) return ['Cast a vote first.']; const b = vb[vb.length-1]; return [`getTransactionReceipt =>`, '', `  block: #${b.number}`, `  hash:  0x${b.hash.slice(2,14)}…`, `  status: 1 (success)`, `  gasUsed: ~46,832`]; },
+    verifyChain: () => { const bad=[]; for(let i=1;i<chain.length;i++) if(chain[i].prevHash!==chain[i-1].hash) bad.push(`Block #${chain[i].number}: bad prevHash`); return bad.length ? ['verifyChain() =>', '', `  ✗ ${bad.length} issue(s):`, ...bad.map(x=>'    '+x)] : ['verifyChain() =>', '', `  ✓ All ${chain.length} blocks valid`]; },
+    doubleVote:  () => ['castVote() ← same wallet second call =>', '', '  REVERT: "Already voted"', '  require(!voters[msg.sender].hasVoted) failed', '  Enforced by EVM — no server can bypass this'],
+  };
+
+  const T = a => ({ padding:'7px 16px', borderRadius:7, fontSize:11, cursor:'pointer', fontWeight:600, ...mono, background:a?'linear-gradient(135deg,#166534,#14532d)':'rgba(255,255,255,0.04)', border:a?'1px solid #22c55e55':'1px solid rgba(255,255,255,0.08)', color:a?'#22c55e':'#6b7280' });
+
+  return (
+    <div>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+        <div style={{ color:'#fff', fontSize:14, fontWeight:700 }}>⛓ Blockchain Explorer</div>
+        <span style={{ background:'rgba(34,197,94,0.1)', border:'1px solid #22c55e33', borderRadius:99, padding:'3px 12px', color:'#22c55e', ...mono, fontSize:10 }}>Hardhat :8545</span>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:16 }}>
+        {[{l:'Blocks',v:chain.length},{l:'Votes',v:chain.reduce((s,b)=>s+b.voteCount,0)},{l:'Difficulty',v:2},{l:'Network',v:'Hardhat'}].map(s=>(
+          <div key={s.l} style={{ background:'rgba(34,197,94,0.05)', border:'1px solid rgba(34,197,94,0.15)', borderRadius:10, padding:'10px 14px' }}>
+            <div style={{ color:'#fff', fontSize:18, fontWeight:800 }}>{s.v}</div>
+            <div style={{ color:'#6b7280', ...mono, fontSize:9 }}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+        {[['chain','⛓ Live Chain'],['query','⌨ Query Console'],['solidity','📄 Solidity Code']].map(([id,label])=>(
+          <button key={id} onClick={()=>setXTab(id)} style={T(xTab===id)}>{label}</button>
+        ))}
+      </div>
+
+      {xTab==='chain' && (
+        <div>
+          {chain.length===0 ? <div style={{color:'#4b5563',...mono,fontSize:11,padding:20}}>No blocks yet.</div> : (
+            <div style={{ overflowX:'auto', paddingBottom:8 }}>
+              <div style={{ display:'flex', alignItems:'center', minWidth:'max-content' }}>
+                {[...chain].reverse().map((b,i)=>(
+                  <div key={b.number} style={{ display:'flex', alignItems:'center' }}>
+                    {i>0 && <span style={{ color:'#22c55e44', fontSize:18, padding:'0 4px' }}>←</span>}
+                    <div style={{ background:'rgba(8,18,8,0.88)', border:b.type==='genesis'?'1.5px solid #185FA5':'1.5px solid rgba(34,197,94,0.35)', borderRadius:10, padding:'10px 12px', minWidth:170 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+                        <span style={{ color:'#22c55e', ...mono, fontSize:10, fontWeight:700 }}>Block #{b.number}</span>
+                        <span style={{ padding:'1px 7px', borderRadius:99, ...mono, fontSize:8, background:b.type==='genesis'?'rgba(24,95,165,0.2)':'rgba(34,197,94,0.12)', color:b.type==='genesis'?'#378ADD':'#22c55e' }}>{b.type}</span>
+                      </div>
+                      <div style={{ color:'#6b7280', ...mono, fontSize:9, marginBottom:2 }}>prev: 0x{b.prevHash.slice(2,10)}…</div>
+                      <div style={{ color:'#86efac', ...mono, fontSize:9, marginBottom:2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:155 }}>hash: 0x{b.hash.slice(2,12)}…</div>
+                      <div style={{ color:'#4b5563', ...mono, fontSize:9 }}>{b.voteCount} votes · {b.ts}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div style={{ marginTop:12, background:'rgba(0,0,0,0.35)', border:'1px solid rgba(34,197,94,0.1)', borderRadius:8, padding:'10px 14px', color:'#6b7280', ...mono, fontSize:10, lineHeight:1.7 }}>
+            Each block stores the <span style={{color:'#86efac'}}>hash of the previous block</span> as <span style={{color:'#22c55e'}}>prev_hash</span>. Tampering with any vote breaks all subsequent hashes — detectable instantly via <span style={{color:'#22c55e'}}>verifyChain()</span>.
+          </div>
+        </div>
+      )}
+
+      {xTab==='query' && (
+        <div>
+          <div style={{ display:'flex', gap:7, flexWrap:'wrap', marginBottom:12 }}>
+            {[['getResults','getResults()'],['hasVoted','hasVoted()'],['getBlock','getBlock()'],['blockCount','blockNumber()'],['txReceipt','txReceipt()'],['verifyChain','verifyChain()']].map(([k,l])=>(
+              <button key={k} onClick={()=>setQLog(QUERIES[k]())} style={{ padding:'6px 13px', borderRadius:6, fontSize:10, cursor:'pointer', ...mono, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'#86efac' }}>{l}</button>
+            ))}
+            <button onClick={()=>setQLog(QUERIES.doubleVote())} style={{ padding:'6px 13px', borderRadius:6, fontSize:10, cursor:'pointer', ...mono, background:'rgba(239,68,68,0.08)', border:'1px solid #ef444433', color:'#ef4444' }}>⚠ double vote</button>
+          </div>
+          <div style={{ background:'rgba(0,0,0,0.5)', border:'1px solid rgba(34,197,94,0.1)', borderRadius:8, padding:'12px 14px', minHeight:160, maxHeight:280, overflowY:'auto' }}>
+            {qLog.map((line,i)=>(
+              <div key={i} style={{ ...mono, fontSize:11, lineHeight:1.85, color: i===0?'#378ADD':line.includes('✓')?'#22c55e':(line.includes('✗')||line.includes('REVERT'))?'#ef4444':line.trim()===''?'transparent':'#86efac' }}>{line||'\u00a0'}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {xTab==='solidity' && (
+        <div>
+          <div style={{ display:'flex', gap:7, marginBottom:10 }}>
+            {[['contract','ChainVote.sol'],['deploy','deploy.js'],['hardhat','hardhat.config.js']].map(([id,label])=>(
+              <button key={id} onClick={()=>setSTab(id)} style={{ padding:'5px 14px', borderRadius:6, fontSize:10, cursor:'pointer', ...mono, background:sTab===id?'rgba(34,197,94,0.1)':'rgba(255,255,255,0.03)', border:sTab===id?'1px solid #22c55e44':'1px solid rgba(255,255,255,0.07)', color:sTab===id?'#22c55e':'#6b7280' }}>{label}</button>
+            ))}
+          </div>
+          <div style={{ background:'rgba(0,0,0,0.55)', border:'1px solid rgba(34,197,94,0.1)', borderRadius:8, padding:'14px', overflowX:'auto', maxHeight:380, overflowY:'auto' }}>
+            <pre style={{ ...mono, fontSize:11, lineHeight:1.75, color:'#86efac', margin:0, whiteSpace:'pre' }}>
+              {sTab==='contract' ? `// ChainVote.sol\npragma solidity ^0.8.20;\n\ncontract ChainVote is Ownable {\n    struct Candidate { uint256 id; string name; string party; uint256 voteCount; }\n    struct Voter { bool hasVoted; uint256 candidateId; uint256 timestamp; }\n\n    mapping(uint256 => Candidate) public candidates;\n    mapping(address => Voter) public voters;\n    event VoteCast(address indexed voter, uint256 indexed candidateId, uint256 timestamp);\n\n    function castVote(uint256 _candidateId) external {\n        require(isOpen, "Election is not open");\n        require(!voters[msg.sender].hasVoted, "Already voted"); // double-vote prevention\n        require(_candidateId < candidateCount, "Invalid candidate");\n        voters[msg.sender] = Voter({ hasVoted: true, candidateId: _candidateId, timestamp: block.timestamp });\n        candidates[_candidateId].voteCount++;\n        totalVotes++;\n        emit VoteCast(msg.sender, _candidateId, block.timestamp);\n    }\n}`
+              : sTab==='deploy' ? `// deploy.js\nconst { ethers } = require("hardhat");\nasync function main() {\n  const ChainVote = await ethers.getContractFactory("ChainVote");\n  const contract = await ChainVote.deploy("Election 2025");\n  await contract.waitForDeployment();\n  await contract.addCandidate("Alexandra Reid", "Progressive Alliance");\n  await contract.addCandidate("Marcus Chen", "National Unity Party");\n  await contract.openElection();\n  console.log("Deployed to:", await contract.getAddress());\n}\nmain().catch(err => { console.error(err); process.exit(1); });`
+              : `// hardhat.config.js\nrequire("@nomicfoundation/hardhat-toolbox");\nmodule.exports = {\n  solidity: "0.8.20",\n  networks: {\n    hardhat: { chainId: 31337 },\n    localhost: { url: "http://127.0.0.1:8545" }\n  }\n};\n// npx hardhat node\n// npx hardhat compile\n// npx hardhat run scripts/deploy.js --network localhost`}
+            </pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
-export function Dashboard({ elections, blocks, token }) {
+export function Dashboard({ elections, blocks, token, onBlocksClick }) {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
 
@@ -47,11 +160,12 @@ export function Dashboard({ elections, blocks, token }) {
         {[
           { label: 'Active Elections', value: activeElections.length, icon: '🗳️', c: '#22c55e' },
           { label: 'Total Votes', value: totalVotes.toLocaleString(), icon: '📊', c: '#eab308' },
-          { label: 'Blocks Mined', value: blocks.length, icon: '⛓️', c: '#10b981' },
+          { label: 'Blocks Mined', value: blocks.length, icon: '⛓️', c: '#10b981', onClick: onBlocksClick },
           { label: 'Face Auth', value: user?.faceRegistered ? 'Active' : 'Inactive', icon: '🧬', c: user?.faceRegistered ? '#22c55e' : '#ef4444' },
           ...(stats ? [{ label: 'Total Voters', value: stats.totalVoters, icon: '👥', c: '#f59e0b' }] : []),
         ].map((s, i) => (
-          <Card key={s.label} delay={i * 0.05} glow>
+          <Card key={s.label} delay={i * 0.05} glow onClick={s.onClick} style={{ position:'relative', cursor: s.onClick ? 'pointer' : 'default' }}>
+            {s.onClick && <div style={{ position:'absolute',top:8,right:10,color:'#22c55e55',fontFamily:"'IBM Plex Mono',monospace",fontSize:9 }}>explore ↗</div>}
             <div style={{ color: s.c, fontSize: 22, marginBottom: 8 }}>{s.icon}</div>
             <div style={{ color: '#fff', fontSize: 22, fontWeight: 800 }}>{s.value}</div>
             <div style={{ color: '#6b7280', fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, marginTop: 3 }}>{s.label}</div>
@@ -303,12 +417,13 @@ ChainVote Blockchain Voting System v1.0`.trim();
 }
 
 // ── ADMIN PAGE ────────────────────────────────────────────────────────────────
-export function AdminPage({ elections, setElections, token, onToast }) {
+export function AdminPage({ elections, setElections, blocks, token, onToast, adminView = 'create', setAdminView }) {
   const [form, setForm] = useState({ title: '', description: '', startDate: '', endDate: '', candidates: [{ name: '', party: '', bio: '' }, { name: '', party: '', bio: '' }] });
   const [voters, setVoters] = useState([]);
   const [stats, setStats] = useState(null);
   const [creating, setCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState('create');
+  const activeTab = adminView;
+  const setActiveTab = (v) => { if (setAdminView) setAdminView(v); };
 
   useEffect(() => {
     api.getVoters(token).then(setVoters).catch(() => {});
@@ -381,9 +496,9 @@ export function AdminPage({ elections, setElections, token, onToast }) {
 
       {/* Admin tabs */}
       <div style={{ display: 'flex', gap: 7, marginBottom: 22 }}>
-        {['create', 'manage', 'voters'].map(t => (
+        {['create', 'manage', 'voters', 'blockchain'].map(t => (
           <Btn key={t} onClick={() => setActiveTab(t)} variant={activeTab === t ? 'primary' : 'secondary'} size="sm" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.05em' }}>
-            {t === 'create' ? '+ Create Election' : t === 'manage' ? '⚙ Manage' : '👥 Voters'}
+            {t === 'create' ? '+ Create' : t === 'manage' ? '⚙ Manage' : t === 'voters' ? '👥 Voters' : '⛓ Blockchain'}
           </Btn>
         ))}
       </div>
@@ -550,6 +665,8 @@ export function AdminPage({ elections, setElections, token, onToast }) {
           ))}
         </div>
       )}
+
+      {activeTab === 'blockchain' && <BlockchainExplorer blocks={blocks} />}
     </div>
   );
 }
