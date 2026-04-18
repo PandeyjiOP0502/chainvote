@@ -21,11 +21,12 @@ const Countdown = ({ endDate }) => {
 };
 
 // ── BLOCKCHAIN EXPLORER ─────────────────────────────────────────────────────────
-function BlockchainExplorer({ blocks: dbBlocks }) {
+function BlockchainExplorer({ blocks: dbBlocks, blockchainMode = 'simulated' }) {
   const [xTab, setXTab] = useState('chain');
   const [sTab, setSTab] = useState('contract');
   const [qLog, setQLog] = useState(['// Click a query button to run it']);
   const mono = { fontFamily: "'IBM Plex Mono',monospace" };
+  const isRemixVM = blockchainMode === 'remix-vm';
 
   const chain = (dbBlocks || []).map((b, i) => ({
     number: b.id, type: i === 0 ? 'genesis' : 'vote',
@@ -51,7 +52,7 @@ function BlockchainExplorer({ blocks: dbBlocks }) {
     <div>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
         <div style={{ color:'#fff', fontSize:14, fontWeight:700 }}>⛓ Blockchain Explorer</div>
-        <span style={{ background:'rgba(34,197,94,0.1)', border:'1px solid #22c55e33', borderRadius:99, padding:'3px 12px', color:'#22c55e', ...mono, fontSize:10 }}>Hardhat :8545</span>
+        <span style={{ background:'rgba(34,197,94,0.1)', border:'1px solid #22c55e33', borderRadius:99, padding:'3px 12px', color:'#22c55e', ...mono, fontSize:10 }}>{isRemixVM ? 'Remix VM :8545' : 'Simulated'}</span>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:16 }}>
@@ -134,7 +135,7 @@ function BlockchainExplorer({ blocks: dbBlocks }) {
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
-export function Dashboard({ elections, blocks, token, onBlocksClick }) {
+export function Dashboard({ elections, blocks, token, blockchainMode, onBlocksClick }) {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
 
@@ -417,7 +418,7 @@ ChainVote Blockchain Voting System v1.0`.trim();
 }
 
 // ── ADMIN PAGE ────────────────────────────────────────────────────────────────
-export function AdminPage({ elections, setElections, blocks, token, onToast, adminView = 'create', setAdminView }) {
+export function AdminPage({ elections, setElections, blocks, token, blockchainMode, onToast, adminView = 'create', setAdminView }) {
   const [form, setForm] = useState({ title: '', description: '', startDate: '', endDate: '', candidates: [{ name: '', party: '', bio: '' }, { name: '', party: '', bio: '' }] });
   const [voters, setVoters] = useState([]);
   const [stats, setStats] = useState(null);
@@ -666,7 +667,7 @@ export function AdminPage({ elections, setElections, blocks, token, onToast, adm
         </div>
       )}
 
-      {activeTab === 'blockchain' && <BlockchainExplorer blocks={blocks} />}
+      {activeTab === 'blockchain' && <BlockchainExplorer blocks={blocks} blockchainMode={blockchainMode} />}
     </div>
   );
 }

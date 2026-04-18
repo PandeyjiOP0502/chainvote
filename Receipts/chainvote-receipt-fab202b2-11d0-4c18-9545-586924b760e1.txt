@@ -1,0 +1,14 @@
+=== ChainVote Official Vote Receipt ===
+
+Voter ID     : 33faae28-5d74-4758-b032-31220c896d9f
+Election     : National Presidential Election 2025
+Candidate    : Marcus Chen (National Unity Party)
+Timestamp    : 3/11/2026, 8:51:26 AM
+TX Hash      : 0x00a82e594f865e3052c4ad09fd5a3824e7e782e05083dec2e99cab69a5d70570-fab202b2
+Block ID     : #6
+Block Hash   : 0x00a82e594f865e3052c4ad09fd5a3824e7e782e05083dec2e99cab69a5d70570
+Face Verified: YES ✓
+Confidence   : 95.5%
+
+This receipt cryptographically proves your vote was recorded on-chain.
+ChainVote Blockchain Voting System v1.0

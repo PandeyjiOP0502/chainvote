@@ -31,6 +31,9 @@ export const api = {
   getStats: (token) => req('GET', '/admin/stats', null, token),
   getBlocks: () => req('GET', '/blockchain/blocks'),
   verifyChain: () => req('GET', '/blockchain/verify'),
+  getBlockchainStatus: () => req('GET', '/blockchain/status'),
+  getContractVoteCount: () => req('GET', '/blockchain/contract/vote-count'),
+  checkContractVoted: (address) => req('GET', `/blockchain/contract/has-voted/${address}`),
 };
 
 export const createWS = (onMessage) => {

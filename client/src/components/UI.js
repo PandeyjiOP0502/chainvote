@@ -237,3 +237,93 @@ export const BlockMineOverlay = ({ block, onDone }) => {
     </motion.div>
   );
 };
+
+export const MetaMaskButton = ({ onConnect, isConnected, address, chainId, loading }) => {
+  const truncateAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '';
+  const isRemixVM = chainId === '0x539' || chainId === 1337;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '6px 12px',
+        borderRadius: 10,
+        background: isConnected ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${isConnected ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.08)'}`,
+      }}
+    >
+      <div style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: isConnected ? '#22c55e' : '#ef4444',
+        boxShadow: `0 0 8px ${isConnected ? '#22c55e' : '#ef4444'}`,
+      }} />
+      {loading ? (
+        <span style={{ color: '#6b7280', fontFamily: "'IBM Plex Mono',monospace", fontSize: 10 }}>
+          Connecting...
+        </span>
+      ) : isConnected ? (
+        <>
+          <span style={{ color: '#86efac', fontFamily: "'IBM Plex Mono',monospace", fontSize: 10 }}>
+            {truncateAddress(address)}
+          </span>
+          {isRemixVM && (
+            <Badge label="Remix VM" color="#22c55e" />
+          )}
+        </>
+      ) : (
+        <button
+          onClick={onConnect}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: '#6b7280',
+            fontFamily: "'IBM Plex Mono',monospace",
+            fontSize: 10,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <span>🦊</span> Connect MetaMask
+        </button>
+      )}
+    </motion.div>
+  );
+};
+
+export const NetworkStatus = ({ mode, blockCount, totalVotes }) => {
+  const isRemix = mode === 'remix-vm';
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '8px 14px',
+      borderRadius: 10,
+      background: 'rgba(8,18,8,0.6)',
+      border: '1px solid rgba(34,197,94,0.15)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ color: '#22c55e', fontSize: 14 }}>⛓</span>
+        <span style={{ color: '#fff', fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, fontWeight: 600 }}>
+          {isRemix ? 'Remix VM' : 'Simulated'}
+        </span>
+      </div>
+      <div style={{ color: '#374151', fontSize: 10 }}>|</div>
+      <div style={{ color: '#6b7280', fontFamily: "'IBM Plex Mono',monospace", fontSize: 10 }}>
+        <span style={{ color: '#86efac' }}>{blockCount || 0}</span> blocks
+      </div>
+      <div style={{ color: '#374151', fontSize: 10 }}>|</div>
+      <div style={{ color: '#6b7280', fontFamily: "'IBM Plex Mono',monospace", fontSize: 10 }}>
+        <span style={{ color: '#86efac' }}>{totalVotes || 0}</span> votes
+      </div>
+    </div>
+  );
+};

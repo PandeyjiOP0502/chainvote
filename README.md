@@ -1,4 +1,4 @@
-<![CDATA[# ⛓ ChainVote — Blockchain Voting with Face Recognition
+# ⛓ ChainVote — Blockchain Voting with Face Recognition
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -208,4 +208,4 @@ Please report security vulnerabilities through our [Security Policy](SECURITY.md
 <p align="center">
   <b>Made with ❤️ by <a href="https://github.com/PandeyjiOP0502">PandeyjiOP0502</a></b>
 </p>
-]]>
+

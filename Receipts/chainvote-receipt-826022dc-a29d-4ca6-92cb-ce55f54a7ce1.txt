@@ -1,0 +1,14 @@
+=== ChainVote Official Vote Receipt ===
+
+Voter ID     : b9adb588-d6fe-433d-af9d-2a181c2f4b41
+Election     : National Presidential Election 2025
+Candidate    : Priya Sharma (Democratic Front)
+Timestamp    : 3/11/2026, 12:53:25 AM
+TX Hash      : 0x009f3251bc9134858aee484953c3a0ee64fad9b89084e0017350810717d03013-826022dc
+Block ID     : #4
+Block Hash   : 0x009f3251bc9134858aee484953c3a0ee64fad9b89084e0017350810717d03013
+Face Verified: YES ✓
+Confidence   : 99.7%
+
+This receipt cryptographically proves your vote was recorded on-chain.
+ChainVote Blockchain Voting System v1.0

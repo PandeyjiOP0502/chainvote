@@ -25,6 +25,7 @@ function AppInner() {
   const [tab, setTab] = useState('dashboard');
   const [elections, setElections] = useState([]);
   const [blocks, setBlocks] = useState([]);
+  const [blockchainMode, setBlockchainMode] = useState('simulated');
   const [toasts, setToasts] = useState([]);
   const [mineBlock, setMineBlock] = useState(null);
   const [adminView, setAdminView] = useState('create');
@@ -43,6 +44,7 @@ function AppInner() {
     if (!user) return;
     api.getElections().then(setElections).catch(() => {});
     api.getBlocks().then(setBlocks).catch(() => {});
+    api.getBlockchainStatus().then(s => setBlockchainMode(s.mode)).catch(() => {});
   }, [user]);
 
   // WebSocket live updates
@@ -86,7 +88,7 @@ function AppInner() {
 
   const availableTabs = TABS.filter(t => !t.adminOnly || user.role === 'admin');
 
-  const pageProps = { elections, setElections, blocks, setBlocks, onToast: addToast, onMineBlock: setMineBlock, token };
+  const pageProps = { elections, setElections, blocks, setBlocks, blockchainMode, setBlockchainMode, onToast: addToast, onMineBlock: setMineBlock, token };
 
   return (
     <>

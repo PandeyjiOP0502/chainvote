@@ -1,0 +1,14 @@
+=== ChainVote Official Vote Receipt ===
+
+Voter ID     : d57c8163-cb13-4513-b8d9-714fe271ebbb
+Election     : City Council Representative
+Candidate    : David Park (Community First)
+Timestamp    : 3/12/2026, 6:27:46 AM
+TX Hash      : 0x00096dad6a02f90f8430426469e9edc5da462a0e912be503a14fa4834ecdf793-c7e056e8
+Block ID     : #5
+Block Hash   : 0x00096dad6a02f90f8430426469e9edc5da462a0e912be503a14fa4834ecdf793
+Face Verified: YES ✓
+Confidence   : 97.4%
+
+This receipt cryptographically proves your vote was recorded on-chain.
+ChainVote Blockchain Voting System v1.0

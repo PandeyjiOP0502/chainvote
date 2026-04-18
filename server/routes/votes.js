@@ -3,13 +3,13 @@ const jwt     = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { queries } = require('../db');
 const { authenticate } = require('../middleware/auth');
-const { recordVoteOnChain } = require('../blockchain');
+const { recordVoteOnChain, USE_REMIX_VM } = require('../blockchain');
 
 const router = express.Router();
 
-router.post('/cast', authenticate, (req, res) => {
+router.post('/cast', authenticate, async (req, res) => {
   try {
-    const { electionId, candidateId, faceToken } = req.body;
+    const { electionId, candidateId, faceToken, voterAddress } = req.body;
     if (!electionId || !candidateId || !faceToken)
       return res.status(400).json({ error: 'electionId, candidateId, and faceToken required' });
 
@@ -37,7 +37,13 @@ router.post('/cast', authenticate, (req, res) => {
       return res.status(409).json({ error: 'Already voted in this election' });
 
     // Mine block
-    const block  = recordVoteOnChain({ voter_id: req.user.id, candidate_id: candidateId, election_id: electionId });
+    const voteData = { 
+      voter_id: req.user.id, 
+      voter_address: voterAddress || '0x0000000000000000000000000000000000000000',
+      candidate_id: candidateId, 
+      election_id: electionId 
+    };
+    const block  = await recordVoteOnChain(voteData);
     const voteId = uuidv4();
     const txHash = block.hash + '-' + voteId.slice(0, 8);
 
@@ -50,7 +56,15 @@ router.post('/cast', authenticate, (req, res) => {
     const totalVotes = updatedCandidates.reduce((a, c) => a + c.vote_count, 0);
     req.app.get('broadcast')('vote_cast', { electionId, candidateId, candidates: updatedCandidates, totalVotes, blockId: block.id, blockHash: block.hash });
 
-    res.json({ success: true, voteId, txHash, blockId: block.id, blockHash: block.hash, minedAt: block.mined_at });
+    res.json({ 
+      success: true, 
+      voteId, 
+      txHash, 
+      blockId: block.id, 
+      blockHash: block.hash, 
+      minedAt: block.mined_at,
+      blockchainMode: USE_REMIX_VM ? 'remix-vm' : 'simulated'
+    });
   } catch (err) {
     if (err.message?.includes('UNIQUE')) return res.status(409).json({ error: 'Already voted' });
     console.error(err);

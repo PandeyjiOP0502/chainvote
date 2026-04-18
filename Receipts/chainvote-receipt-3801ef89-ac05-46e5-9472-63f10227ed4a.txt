@@ -1,0 +1,14 @@
+=== ChainVote Official Vote Receipt ===
+
+Voter ID     : d57c8163-cb13-4513-b8d9-714fe271ebbb
+Election     : College Presidential Election 
+Candidate    : Vansh Rajiv (PR)
+Timestamp    : 3/13/2026, 2:47:01 AM
+TX Hash      : 0x003498fbdc06fbe42791e291a022f90f896b3d86af831cfff90be0f5bd1e01f1-3801ef89
+Block ID     : #6
+Block Hash   : 0x003498fbdc06fbe42791e291a022f90f896b3d86af831cfff90be0f5bd1e01f1
+Face Verified: YES ✓
+Confidence   : 98.5%
+
+This receipt cryptographically proves your vote was recorded on-chain.
+ChainVote Blockchain Voting System v1.0

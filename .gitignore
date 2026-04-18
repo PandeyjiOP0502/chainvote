@@ -117,3 +117,9 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# AI assistant files
+.claude/
+
+# Windows artifacts
+nul

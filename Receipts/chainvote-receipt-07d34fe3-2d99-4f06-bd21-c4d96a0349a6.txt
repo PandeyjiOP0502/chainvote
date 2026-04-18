@@ -1,0 +1,14 @@
+=== ChainVote Official Vote Receipt ===
+
+Voter ID     : 6bd4a3d4-66f8-4ec6-aad1-4d9e4c1a5cd0
+Election     : College Presidential Election 
+Candidate    : Amit Rajput (Backbone)
+Timestamp    : 3/15/2026, 9:39:22 AM
+TX Hash      : 0x0023840870acd3a3a1fa055495cf16362fe0f88c3c30e8c5be0b763be6914afc-07d34fe3
+Block ID     : #8
+Block Hash   : 0x0023840870acd3a3a1fa055495cf16362fe0f88c3c30e8c5be0b763be6914afc
+Face Verified: YES ✓
+Confidence   : 95.9%
+
+This receipt cryptographically proves your vote was recorded on-chain.
+ChainVote Blockchain Voting System v1.0
