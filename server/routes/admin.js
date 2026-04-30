@@ -92,6 +92,7 @@ router.get('/stats', (_req, res) => {
       activeElections: get(`SELECT COUNT(*) as n FROM elections WHERE status='active'`).n,
       totalVotes:      get(`SELECT COUNT(*) as n FROM votes`).n,
       totalBlocks:     get(`SELECT COUNT(*) as n FROM blockchain`).n,
+      blockchainMode:  require('../blockchain').getBlockchainMode(),
       recentAudit:     all(`SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 10`),
     });
   } catch (err) {

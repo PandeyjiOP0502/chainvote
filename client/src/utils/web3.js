@@ -279,4 +279,30 @@ export const switchToRemixVM = async () => {
   }
 };
 
+export const switchToSepolia = async () => {
+  if (!window.ethereum) throw new Error('MetaMask not installed');
+  
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0xaa36a7' }] // 11155111 in hex
+    });
+  } catch (switchError) {
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: '0xaa36a7',
+          chainName: 'Sepolia Testnet',
+          nativeCurrency: { name: 'SepoliaETH', symbol: 'ETH', decimals: 18 },
+          rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+          blockExplorerUrls: ['https://sepolia.etherscan.io']
+        }]
+      });
+    } else {
+      throw switchError;
+    }
+  }
+};
+
 export { CONTRACT_ADDRESS, CHAINVOTE_ABI };

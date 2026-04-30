@@ -42,6 +42,7 @@ function mountRoutes() {
   app.use('/api/votes',      require('./routes/votes'));
   app.use('/api/admin',      require('./routes/admin'));
   app.use('/api/blockchain', require('./routes/blockchain'));
+  app.use('/api/faucet',     require('./routes/faucet'));
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '1.0.0' }));
 
   if (process.env.NODE_ENV === 'production') {

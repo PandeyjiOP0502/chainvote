@@ -34,6 +34,12 @@ export const api = {
   getBlockchainStatus: () => req('GET', '/blockchain/status'),
   getContractVoteCount: () => req('GET', '/blockchain/contract/vote-count'),
   checkContractVoted: (address) => req('GET', `/blockchain/contract/has-voted/${address}`),
+  compileSolidity: (source) => req('POST', '/blockchain/compile', { source }),
+  // Faucet APIs
+  getFaucetProviders: () => req('GET', '/faucet/providers'),
+  getFaucetBalance: (address) => req('GET', `/faucet/balance/${address}`),
+  getFaucetNetwork: () => req('GET', '/faucet/network'),
+  verifyFaucetTx: (txHash) => req('GET', `/faucet/verify-tx/${txHash}`),
 };
 
 export const createWS = (onMessage) => {

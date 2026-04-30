@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
 import { Card, Avatar, Badge, Btn, ProgressBar, SectionLabel, Input } from '../components/UI';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import FaucetPage from './FaucetPage';
+import SolidityIDE from './SolidityIDE';
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────────
 const Countdown = ({ endDate }) => {
@@ -496,10 +498,10 @@ export function AdminPage({ elections, setElections, blocks, token, blockchainMo
       )}
 
       {/* Admin tabs */}
-      <div style={{ display: 'flex', gap: 7, marginBottom: 22 }}>
-        {['create', 'manage', 'voters', 'blockchain'].map(t => (
+      <div style={{ display: 'flex', gap: 7, marginBottom: 22, flexWrap: 'wrap' }}>
+        {['create', 'manage', 'voters', 'blockchain', 'faucet', 'solidity-ide'].map(t => (
           <Btn key={t} onClick={() => setActiveTab(t)} variant={activeTab === t ? 'primary' : 'secondary'} size="sm" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.05em' }}>
-            {t === 'create' ? '+ Create' : t === 'manage' ? '⚙ Manage' : t === 'voters' ? '👥 Voters' : '⛓ Blockchain'}
+            {t === 'create' ? '+ Create' : t === 'manage' ? '⚙ Manage' : t === 'voters' ? '👥 Voters' : t === 'blockchain' ? '⛓ Blockchain' : t === 'faucet' ? '💧 Faucet' : '🔧 Solidity IDE'}
           </Btn>
         ))}
       </div>
@@ -668,6 +670,10 @@ export function AdminPage({ elections, setElections, blocks, token, blockchainMo
       )}
 
       {activeTab === 'blockchain' && <BlockchainExplorer blocks={blocks} blockchainMode={blockchainMode} />}
+
+      {activeTab === 'faucet' && <FaucetPage onToast={onToast} token={token} />}
+
+      {activeTab === 'solidity-ide' && <SolidityIDE onToast={onToast} />}
     </div>
   );
 }
