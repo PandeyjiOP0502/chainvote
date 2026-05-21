@@ -59,9 +59,14 @@ Full election administration: create & deploy new elections, manage voters, view
 
 ```bash
 npm run install:all    # Install all dependencies
-npm run setup          # Init database + seed data
-npm run dev            # Start server + client
+npm run dev            # Start server + client (auto-creates .env & admin account)
 ```
+
+> **Note:** On first boot, the server will automatically:
+> - Create `server/.env` from `.env.example` (if missing)
+> - Seed a default admin and demo voter in the database
+>
+> You can also run `npm run setup` to manually init the database with demo elections.
 
 Open **http://localhost:3000**
 
@@ -70,6 +75,9 @@ Open **http://localhost:3000**
 |-------|---------------------|-----------|
 | Admin | admin@chainvote.io  | admin123  |
 | Voter | voter@chainvote.io  | voter123  |
+
+> ⚠️ **The Faucet and Solidity IDE are admin-only features.** Log in as `admin@chainvote.io` to access them under the **Admin** tab.
+
 
 ---
 

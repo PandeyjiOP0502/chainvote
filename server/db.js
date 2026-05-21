@@ -131,8 +131,9 @@ const SCHEMA = `
 // ── Async initializer — call once at startup ──────────────────────────────────
 async function initDb() {
   const SQL = await initSqlJs();
+  const isNewDb = !fs.existsSync(DB_PATH);
   // Load existing DB from disk, or create fresh
-  if (fs.existsSync(DB_PATH)) {
+  if (!isNewDb) {
     const fileBuffer = fs.readFileSync(DB_PATH);
     _db = new SQL.Database(fileBuffer);
   } else {
@@ -142,7 +143,44 @@ async function initDb() {
   // Run schema (all CREATE TABLE IF NOT EXISTS — safe to re-run)
   _db.run(SCHEMA);
   save();
+
+  // Auto-seed default admin & voter on first boot so fresh clones work out-of-the-box
+  if (isNewDb) {
+    await seedDefaults();
+  } else {
+    // Also seed if admin doesn't exist (e.g. DB was reset)
+    const adminExists = get(`SELECT id FROM users WHERE email = ?`, ['admin@chainvote.io']);
+    if (!adminExists) await seedDefaults();
+  }
+
   console.log('✅ Database ready');
+}
+
+async function seedDefaults() {
+  const bcrypt = require('bcryptjs');
+  const { v4: uuidv4 } = require('uuid');
+
+  // Seed admin user
+  const adminEmail = 'admin@chainvote.io';
+  const existing = get(`SELECT id FROM users WHERE email = ?`, [adminEmail]);
+  if (!existing) {
+    const adminId = uuidv4();
+    const hash = bcrypt.hashSync('admin123', 12);
+    run(`INSERT INTO users (id, name, email, password_hash, role, voter_id) VALUES (?, ?, ?, ?, ?, ?)`,
+      [adminId, 'System Admin', adminEmail, hash, 'admin', 'CV-ADMIN001']);
+    console.log('🔑 Default admin created: admin@chainvote.io / admin123');
+  }
+
+  // Seed demo voter
+  const voterEmail = 'voter@chainvote.io';
+  const existingVoter = get(`SELECT id FROM users WHERE email = ?`, [voterEmail]);
+  if (!existingVoter) {
+    const voterId = uuidv4();
+    const hash = bcrypt.hashSync('voter123', 12);
+    run(`INSERT INTO users (id, name, email, password_hash, role, voter_id) VALUES (?, ?, ?, ?, ?, ?)`,
+      [voterId, 'Demo Voter', voterEmail, hash, 'voter', 'CV-DEMO001']);
+    console.log('👤 Default voter created: voter@chainvote.io / voter123');
+  }
 }
 
 // ── Query helpers (mirror the better-sqlite3 queries object) ─────────────────

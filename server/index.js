@@ -1,4 +1,13 @@
+// Auto-create .env from .env.example if missing (for fresh clones / ZIP downloads)
+const fs = require('fs');
+const envPath = require('path').join(__dirname, '.env');
+const envExample = require('path').join(__dirname, '.env.example');
+if (!fs.existsSync(envPath) && fs.existsSync(envExample)) {
+  fs.copyFileSync(envExample, envPath);
+  console.log('📋 Created .env from .env.example (first-time setup)');
+}
 require('dotenv').config();
+
 const express   = require('express');
 const http      = require('http');
 const WebSocket = require('ws');
